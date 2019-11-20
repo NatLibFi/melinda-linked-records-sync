@@ -20,7 +20,8 @@
     "main": "src/app.js",
     "scripts": {
         "start": "node -r esm src/app.js",
-        "lint": "eslint ./src --fix",
+        "lint": "eslint ./src",
+        "lint:dev": "eslint ./src --fix",
         "build": "babel ./src --out-dir dist",
         "dev": "NODE_ENV=development nodemon",
         "prod": "NODE_ENV=production build start"

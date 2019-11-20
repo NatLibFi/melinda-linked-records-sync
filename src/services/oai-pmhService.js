@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-warning-comments */
+/* eslint-disable no-unused-vars */
 
 import https from 'https';
 import {Utils} from '@natlibfi/melinda-commons';
