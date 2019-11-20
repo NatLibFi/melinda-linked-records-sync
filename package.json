@@ -1,0 +1,40 @@
+{
+    "name": "@natlibfi/todo",
+    "version": "0.0.1",
+    "description": "",
+    "author": {
+        "name": "The National Library of Finland"
+    },
+    "repository": {
+        "type": "git",
+        "url": "TODO"
+    },
+    "homepage": "TODO",
+    "bugs": {
+        "url": "todo.com/"
+    },
+    "license": "AGPL-3.0+",
+    "engines": {
+        "node": ">=10"
+    },
+    "main": "src/app.js",
+    "scripts": {
+        "start": "node -r esm src/app.js",
+        "build": "babel ./src --out-dir dist",
+        "dev": "NODE_ENV=development nodemon",
+        "prod": "NODE_ENV=production build start"
+    },
+    "dependencies": {
+        "@natlibfi/melinda-commons": "^7.0.0",
+        "esm": "^3.2.25"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.7.0",
+        "@babel/core": "^7.7.2",
+        "@babel/node": "^7.7.0",
+        "@babel/preset-env": "^7.7.1",
+        "eslint": "^6.4.0",
+        "eslint-config-xo": "^0.27.1",
+        "nodemon": "^1.19.4"
+    }
+}
