@@ -11,7 +11,7 @@
     },
     "homepage": "TODO",
     "bugs": {
-        "url": "todo.com/"
+        "url": "https://todo.com/"
     },
     "license": "AGPL-3.0+",
     "engines": {
@@ -20,12 +20,14 @@
     "main": "src/app.js",
     "scripts": {
         "start": "node -r esm src/app.js",
+        "lint": "eslint ./src --fix",
         "build": "babel ./src --out-dir dist",
         "dev": "NODE_ENV=development nodemon",
         "prod": "NODE_ENV=production build start"
     },
     "dependencies": {
         "@natlibfi/melinda-commons": "^7.0.0",
+        "@natlibfi/melinda-record-import-commons": "7.0.1",
         "esm": "^3.2.25"
     },
     "devDependencies": {

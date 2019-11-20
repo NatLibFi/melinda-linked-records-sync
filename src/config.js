@@ -13,5 +13,5 @@ export const OAI_PMH_PASSWORD = readEnvironmentVariable('OAI_PMH_PASSWORD', {def
 
 // Config defaults
 export const DEFAULT_OAI_PMH_ROOT = readEnvironmentVariable('DEFAULT_OAI_PMH_ROOT', {defaultValue: 'bib'});
-export const DEFAULT_TAGS = readEnvironmentVariable('DEFAULT_TAGS', {defaultValue: ["100", "600", "650"]});
+export const DEFAULT_TAGS = readEnvironmentVariable('DEFAULT_TAGS', {defaultValue: ['100', '600', '650']});
 export const DEFAULT_FORMAT = readEnvironmentVariable('DEFAULT_FORMAT', {defaultValue: 'melinda_marc'});
