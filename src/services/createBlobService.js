@@ -35,11 +35,10 @@ async function setEmitterListeners(root, format) {
 			})
 			.on('CHUNK_LOADED', async content => {
 				// TODO START CONSUME
-				let chunk = [];
-				content.forEach(id => {
-					chunk.push(processId(id));
+				let chunk = content.map(id => {
+					return processId(id);
 				});
-				await Promise.all(chunk);
+				chunk = await Promise.all(chunk);
 				EMITTER.emit('GET_SRU_DATA', chunk);
 
 				async function processId(id) {
@@ -54,8 +53,7 @@ async function setEmitterListeners(root, format) {
 			})
 			.on('GET_SRU_DATA', async chunk => {
 				logger.log('info', 'Getting link data from SRU');
-				chunk = await chunk.map(async record => {
-					await Promise.resolve(record);
+				chunk = chunk.map(record => {
 					if (record) {
 						const linkedData = getLinkedInfo(record);
 						return {
@@ -63,17 +61,21 @@ async function setEmitterListeners(root, format) {
 							linkedData
 						};
 					}
+
+					return false;
+				}).filter(record => {
+					return record;
 				});
-				await Promise.all([...chunk]);
+
+				await Promise.all(chunk);
+				EMITTER.emit('SEND_BLOB', chunk);
+			})
+			.on('SEND_BLOB', chunk => {
+				console.log('SENDING BLOB!');
 				console.log(chunk);
+				// TODO SEND TO ERÄTUONTI
 				EMITTER.emit('DONE');
 			});
-	});
-}
-
-function resolvePromises(promises) {
-	return promises.map(promise => {
-		return Promise.resolve(promise);
 	});
 }
 
