@@ -19,6 +19,7 @@ export const OAI_PMH_CONCURRENT_REQUESTS = readEnvironmentVariable('OAI_PMH_CONC
 // SRU variables
 export const SRU_URL = readEnvironmentVariable('SRU_URL', {defaultValue: ''});
 export const SRU_HTTP_PORT = readEnvironmentVariable('SRU_HTTP_PORT', {defaultValue: 8080, format: v => Number(v)});
+export const SRU_VERSION = readEnvironmentVariable('SRU_VERSION', {defaultValue: '2'});
 
 // Config file variables
 export const CONF_FILE = './job-configs/' + readEnvironmentVariable('CONF_FILE', {defaultValue: 'run2.json'});

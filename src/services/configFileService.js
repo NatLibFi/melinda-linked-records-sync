@@ -66,9 +66,9 @@ function validateConfFile(jsonConf) {
 	function buildOpts(jsonConf) {
 		let optsJson = {
 			date: moment(),
-			root: getRoot(jsonConf),
-			format: getFormat(jsonConf),
-			tags: getTags(jsonConf)
+			root: jsonConf.oai_pmh_root || DEFAULT_OAI_PMH_ROOT,
+			format: jsonConf.format || DEFAULT_FORMAT,
+			tags: jsonConf.tags || DEFAULT_TAGS
 		};
 		if (jsonConf.confType !== undefined) {
 			optsJson.confType = jsonConf.confType;
@@ -83,29 +83,5 @@ function validateConfFile(jsonConf) {
 		}
 
 		return optsJson;
-	}
-
-	function getTags(jsonConf) {
-		if (jsonConf.tags !== undefined) {
-			return jsonConf.tags;
-		}
-
-		return DEFAULT_TAGS;
-	}
-
-	function getRoot(jsonConf) {
-		if (jsonConf.oai_pmh_root !== undefined) {
-			return jsonConf.oai_pmh_root;
-		}
-
-		return DEFAULT_OAI_PMH_ROOT;
-	}
-
-	function getFormat(jsonConf) {
-		if (jsonConf.format !== undefined) {
-			return jsonConf.format;
-		}
-
-		return DEFAULT_FORMAT;
 	}
 }

@@ -31,6 +31,7 @@
         "@natlibfi/marc-record-serializers": "^5.0.0",
         "@natlibfi/melinda-commons": "^7.0.0",
         "@natlibfi/melinda-record-import-commons": "7.0.1",
+        "@natlibfi/sru-client": "^3.1.2",
         "amqplib": "0.5.5",
         "axios": "^0.19.0",
         "esm": "^3.2.25",
