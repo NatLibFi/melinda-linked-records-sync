@@ -22,14 +22,19 @@
         "start": "node -r esm src/app.js",
         "lint": "eslint ./src",
         "lint:dev": "eslint ./src --fix",
+        "clean": "node -r esm ./job/clean.js",
         "build": "babel ./src --out-dir dist",
         "dev": "NODE_ENV=development nodemon",
         "prod": "NODE_ENV=production build start"
     },
     "dependencies": {
+        "@natlibfi/marc-record-serializers": "^5.0.0",
         "@natlibfi/melinda-commons": "^7.0.0",
         "@natlibfi/melinda-record-import-commons": "7.0.1",
-        "esm": "^3.2.25"
+        "amqplib": "0.5.5",
+        "axios": "^0.19.0",
+        "esm": "^3.2.25",
+        "xml2js": "0.4.22"
     },
     "devDependencies": {
         "@babel/cli": "^7.7.0",

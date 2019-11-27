@@ -44,6 +44,11 @@ export async function getBlobs() {
 	async function getFailedRecordsFromBlob(id) {
 		const data = await client.getBlobMetadata({id});
 		console.log(data.processingInfo.failedRecords);
+		const failedRecords = data.processingInfo.failedRecords;
+		const justRecords = failedRecords.map(record => {
+			return record.record;
+		});
+		console.log(justRecords);
 	}
 }
 

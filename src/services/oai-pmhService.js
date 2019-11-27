@@ -1,50 +1,76 @@
 /* eslint-disable no-unused-vars */
 
-import https from 'https';
+import axios from 'axios';
+import fs from 'fs';
 import {Utils} from '@natlibfi/melinda-commons';
 
-import {OAI_PMH_URL, OAI_PMH_HTTP_PORT, OAI_PMH_USERNAME, OAI_PMH_PASSWORD} from '../config';
+import {OAI_PMH_URL, OAI_PMH_USERNAME, OAI_PMH_PASSWORD} from '../config';
 
-const {createLogger} = Utils;
+const {createLogger, fromAlephId} = Utils;
+const logger = createLogger();
 
-export async function getRecordFrom(opts) {
-	const logger = createLogger();
+// TODO one function to connect + one function to make getString from opts
 
+export async function getRecordById(opts) {
+	// TODO HTTP gets
+	// https://oai-pmh.api.melinda.kansalliskirjasto.fi/bib?verb=GetRecord&metadataPrefix=melinda_marc
 	// Temp to see all opts
 	const {root, id, format} = opts;
 
+	const getString = `?verb=GetRecord&metadataPrefix=${format}&identifier=oai:melinda.kansalliskirjasto.fi/${fromAlephId(id)}`;
+	const baseURL = OAI_PMH_URL;
+	const url = `/${root}${getString}`;
+	// TEST logger.log('debug', baseURL + url);
+
+	// Axios#get(url[, config])
+	return axios({
+		method: 'GET',
+		url,
+		baseURL,
+		responseType: 'text'
+	});
+}
+
+export async function getRecordsList(opts) {
 	// TODO HTTP gets
-	/*
-    {
-    "descr": "Should respond with a record",
-    "requestUrl": "/bib?verb=GetRecord&metadataPrefix=marc&identifier=oai:foo.bar/12345"
-    }
-    */
-	const getString = `?verb=GetRecord&metadataPrefix=${format}&identifier=${OAI_PMH_USERNAME}:${OAI_PMH_PASSWORD}/${id}`;
-	logger.log('debug', 'incoming opts + http options');
-	logger.log('debug', JSON.stringify(opts));
+	// https://oai-pmh.api.melinda.kansalliskirjasto.fi/bib?verb=ListRecords&metadataPrefix=melinda_marc
+	// Temp to see all opts
+	const {root, format} = opts;
 
-	const https = require('https');
-	const options = {
-		hostname: OAI_PMH_URL,
-		port: OAI_PMH_HTTP_PORT,
-		path: `/${root}${getString}`,
-		method: 'GET'
-	};
-	logger.log('debug', JSON.stringify(options));
-	/*
-    Const req = https.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+	const getString = `?verb=ListRecords&metadataPrefix=${format}`;
+	const url = `/${root}${getString}`;
+	const baseURL = `${OAI_PMH_URL}`;
+	// TEST logger.log('debug', baseURL + url);
 
-        res.on('data', d => {
-          logger.log(d);
-        })
-      })
+	// Axios#get(url[, config])
+	return axios({
+		method: 'GET',
+		url,
+		baseURL,
+		responseType: 'text'
+	});
 
-      req.on('error', error => {
-        logger.log('error',error)
-      })
+	// Works too
+	// Const response = await axios.get(baseURL + url);
+	// console.log(response);
+}
 
-      req.end()
-      */
+export async function resumeRecordList(opts) {
+	// TODO HTTP gets
+	// TODO ?verb=ListRecords&resumptionToken=<token>
+	// Temp to see all opts
+	const {root, resumptioinToken} = opts;
+
+	const getString = `?verb=ListRecords&resumptionToken=${resumptioinToken}`;
+	const url = `/${root}${getString}`;
+	const baseURL = `${OAI_PMH_URL}`;
+	// TEST logger.log('debug', baseURL + url);
+
+	// Axios#get(url[, config])
+	return axios({
+		method: 'GET',
+		url,
+		baseURL,
+		responseType: 'text'
+	});
 }
