@@ -1,4 +1,6 @@
-# Service for queuing import records from melinda-rest-api
+# Service for record link migration
+
+This service collects data and sends it as blob to link-transformers
 
 ## License and copyright
 
