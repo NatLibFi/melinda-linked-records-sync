@@ -7,10 +7,6 @@ import {
 
 const {createLogger} = Utils;
 
-// TODO Connection to database
-// TODO - Send record to queue
-// TODO TRANSFORMER picks it from QUEUE
-
 export async function getBlobs() {
 	const logger = createLogger();
 	logger.log('info', 'Melinda-record-link-migration ErätuontiService has begun!');
@@ -41,6 +37,7 @@ export async function getBlobs() {
 		}
 	}
 
+	// TODO: From failedRecords or from import state UPDATE_REQUIRED
 	async function getFailedRecordsFromBlob(id) {
 		const data = await client.getBlobMetadata({id});
 		console.log(data.processingInfo.failedRecords);
@@ -49,6 +46,32 @@ export async function getBlobs() {
 			return record.record;
 		});
 		console.log(justRecords);
+	}
+
+	async function getUpdateRequiredRecordsFromBlob(id) {
+		const data = await client.getBlobMetadata({id});
+		console.log(data.processingInfo.importResults);
+		const importResults = data.processingInfo.importResults;
+		const justMetadata = importResults.map(record => {
+			if (record.status === "UPDATE REQUIRED") {
+				return record.metadata;
+			}
+		});
+		/* UPDATE REQUIRED schema: (Record does not have most recent version)
+		{
+        	"timestamp": "2019-11-14T16:09:45.725Z",
+        	"status": "UPDATE REQUIRED",
+        	"metadata": {
+          		"id": "012345678",
+          		"linkData": [
+					{"400": data},
+					{"100": data},
+					{"135": data}
+        		]
+    		}
+    	}
+		*/
+		console.log(justMetadata);
 	}
 }
 
@@ -77,4 +100,20 @@ export async function processBlobs({client, query, processCallback, messageCallb
 				resolve(Promise.all(pendingProcessors));
 			});
 	});
+}
+
+// TODO - Send record to queue
+export async function sendBlob(blob = [], type = 'application/json', profile = '') {
+	const logger = createLogger();
+	logger.log('info', 'Melinda-record-link-migration blob sending to ErätuontiService has begun!');
+
+	const client = createApiClient({
+		url: API_URL, username: API_USERNAME, password: API_PASSWORD,
+		userAgent: API_CLIENT_USER_AGENT
+	});
+
+	logger.log('info', `Trying to create  blob`);
+	// Record-import-commons: async function createBlob({blob, type, profile})
+	client.createBLOB({blob, type, profile});
+	// TODO TRANSFORMER picks it from QUEUE
 }

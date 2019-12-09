@@ -12,15 +12,15 @@ import {EMITTER} from '../app';
 const {createLogger} = Utils;
 const logger = createLogger();
 
-export function createBlob({root, format, confType, ids, fromTo}) {
+export function createBlob({root, format, tags, confType, ids, fromTo}) {
 	logger.log('info', 'BEGUN TO MAKE BLOB!');
-	setEmitterListeners(root, format);
+	setEmitterListeners(root, format, tags);
 	if (confType === 1 || confType === 2) {
 		operateRabbitQueue(false, true);
 	}
 }
 
-async function setEmitterListeners(root, format) {
+async function setEmitterListeners(root, format, tags) {
 	logger.log('info', 'emiter ok!');
 	await new Promise(res => {
 		EMITTER
@@ -53,9 +53,9 @@ async function setEmitterListeners(root, format) {
 			})
 			.on('GET_SRU_DATA', async chunk => {
 				logger.log('info', 'Getting link data from SRU');
-				chunk = chunk.map(record => {
+				chunk = chunk.map(async record => {
 					if (record) {
-						const linkedData = getLinkedInfo(record);
+						const linkedData = await getLinkedInfo(record, tags);
 						return {
 							record,
 							linkedData
@@ -63,11 +63,13 @@ async function setEmitterListeners(root, format) {
 					}
 
 					return false;
-				}).filter(record => {
+				});
+
+				chunk = await Promise.all(chunk);
+				chunk = chunk.filter(record => {
 					return record;
 				});
 
-				await Promise.all(chunk);
 				EMITTER.emit('SEND_BLOB', chunk);
 			})
 			.on('SEND_BLOB', chunk => {
