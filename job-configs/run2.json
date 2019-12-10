@@ -2,6 +2,6 @@
     "confType": 2,
     "oai_pmh_root": "bib",
     "format": "melinda_marc",
-    "tags": ["100", "600", "650", "700"],
+    "tags": ["100", "110"],
     "fromTo": {"start": 15408, "end": 15448}
 }

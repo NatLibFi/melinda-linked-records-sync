@@ -6,6 +6,7 @@ import {logError, changeJobStatus} from '../util';
 import {readXMLResponseToMarcRecords} from './responseToRecordService';
 import {getRecordsList, getRecordById} from './oai-pmhService';
 import {getLinkedInfo} from './sruService';
+import {sendBlob} from './eratuontiService';
 import {AMQP_URL, AMQP_QUEUE_NAME, JOB_DONE} from '../config';
 import {EMITTER} from '../app';
 
@@ -75,7 +76,7 @@ async function setEmitterListeners(root, format, tags) {
 			.on('SEND_BLOB', chunk => {
 				console.log('SENDING BLOB!');
 				console.log(chunk);
-				// TODO SEND TO ERÄTUONTI
+				sendBlob(chunk, 'application/json');
 				EMITTER.emit('DONE');
 			});
 	});

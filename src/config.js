@@ -7,6 +7,7 @@ export const API_URL = readEnvironmentVariable('API_URL');
 export const API_USERNAME = readEnvironmentVariable('API_USERNAME');
 export const API_PASSWORD = readEnvironmentVariable('API_PASSWORD');
 export const API_CLIENT_USER_AGENT = readEnvironmentVariable('API_CLIENT_USER_AGENT', {defaultValue: '_RECORD-LINK-MIGRATION'});
+export const API_HARVERSTER_PROFILE_ID = readEnvironmentVariable('API_HARVERSTER_PROFILE_ID');
 
 // OAI-PMH connection variables
 // TODO Change URL to test
@@ -25,7 +26,7 @@ export const SRU_VERSION = readEnvironmentVariable('SRU_VERSION', {defaultValue:
 export const CONF_FILE = './job-configs/' + readEnvironmentVariable('CONF_FILE', {defaultValue: 'run2.json'});
 export const CURRENT_JOB_FILEPATH = './job/done.json';
 export const DEFAULT_OAI_PMH_ROOT = readEnvironmentVariable('DEFAULT_OAI_PMH_ROOT', {defaultValue: 'bib'});
-export const DEFAULT_TAGS = readEnvironmentVariable('DEFAULT_TAGS', {defaultValue: ['100', '600', '650']});
+export const DEFAULT_TAGS = readEnvironmentVariable('DEFAULT_TAGS', {defaultValue: ['100', '110', '350']});
 export const DEFAULT_FORMAT = readEnvironmentVariable('DEFAULT_FORMAT', {defaultValue: 'melinda_marc'});
 // Chunk size 100 => last request time ~8.5sec. Chunk size 10 => last request time ~1sec (sequental id numbers)
 // Chunk size 100 => last request time ?. Chunk size 10 => last request time ~1.1sec (unsequental id numbers)

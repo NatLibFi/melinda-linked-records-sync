@@ -12,26 +12,28 @@ const logger = createLogger();
 export async function getLinkedInfo(marcRecord, tags) {
 	let linkdata = [];
 	// Generate querries
-	const querry = generateQuerry(marcRecord, tags);
-
+	const querries = await generateQuerries(marcRecord, tags);
+	// Check incoming record logger.log('debug', JSON.stringify(marcRecord));
 	// Execute querries
-	await new Promise((resolve, reject) => {
-		// TODO: Search every tag
-		client.searchRetrieve(querry[0])
-			.on('record', xmlString => {
-				// TODO processRecord(xmlString);
-				linkdata.push(MARCXML.from(xmlString));
-				// Check incoming data: logger.log('debug', JSON.stringify(record));
-			})
-			.on('end', () => resolve())
-			.on('error', err => reject(err));
-	});
+	if (querries.length > 0) {
+		await new Promise((resolve, reject) => {
+			// TODO: Search every tag
+			client.searchRetrieve(querries[0].query)
+				.on('record', xmlString => {
+					// TODO processRecord(xmlString);
+					linkdata.push({tag: querries.tag, record: MARCXML.from(xmlString)});
+					// Check incoming data: logger.log('debug', JSON.stringify(record));
+				})
+				.on('end', () => resolve())
+				.on('error', err => reject(err));
+		});
+	}
 
 	// Return json
 	return linkdata;
 }
 
-function generateQuerry(marcRecord, tags) {
+async function generateQuerries(marcRecord, tags) {
 	// KATSO https://github.com/NatLibFi/marc-record-js
 	// TODO Kentät BIB
 	// Haku titlellä client.searchRetrieve('dc.title="kivi*"')
@@ -63,5 +65,51 @@ function generateQuerry(marcRecord, tags) {
 	// 373 - YHTEYS RYHMÄÄN (T)
 	// 375 - SUKUPUOLI (T)
 	// 378 - HENKILÖNNIMEN TÄYDELLISEMPI MUOTO (T)
-	return ['dc.title="kivi*"'];
+	const querries = [];
+	let fields;
+	tags.forEach(tag => {
+		switch (tag) {
+			case '100':
+				fields = marcRecord.get(/^100$/);
+				// Check ind1 = 0 - Nimen osien järjestys suora,  = 1 - Nimen osien järjestys käänteinen, = 3  - Suvun nimi
+				if (fields.length > 0 && (fields[0].ind1 === '0' || fields[0].ind1 === '1')) {
+					const subfields = fields[0].subfields;
+					// Check field content console.log(fields[0]);
+					// No point to repeat allready linked data ‡0 - Auktoriteettitietueen kontrollinumero (T)
+					if (!subfields.some(sub => sub.code === '0')) {
+						const subA = subfields.find(sub => sub.code === 'a'); // ‡a - Henkilönnimi (ET)
+						const subD = subfields.find(sub => sub.code === 'd'); // ‡d - Nimeen liittyvät aikamääreet (ET)
+						const subF = subfields.find(sub => sub.code === 'f'); // ‡f - Teoksen julkaisuaika (ET)
+						const subQ = subfields.find(sub => sub.code === 'q'); // ‡q - Henkilönnimen täydellisempi muoto (ET)
+
+						querries.push({tag, query: `dc.author="${subA.value}"`});
+					}
+				}
+
+				break;
+			case '110':
+				// TODO: Yhteisöt
+				fields = marcRecord.get(/^110$/);
+				if (fields.length > 0) {
+					const subfields = fields[0].subfields;
+					console.log(subfields);
+					// No point to repeat allready linked data
+					if (!subfields.some(sub => sub.code === '0')) {
+						const subA = subfields.find(sub => sub.code === 'a'); // ‡a - Yhteisönnimi (ET)
+						const subE = subfields.find(sub => sub.code === 'e'); // ‡e - Suhdetermi (T)
+						const subF = subfields.find(sub => sub.code === 'f'); // ‡f - Teoksen julkaisuaika (ET)
+
+						// Querry communities querries.push(`dc.author="${subA.value}"`);
+					}
+				}
+
+				break;
+			case '370':
+				// TODO Paikat
+				break;
+			default:
+				break;
+		}
+	});
+	return querries;
 }

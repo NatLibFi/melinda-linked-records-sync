@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars, */
+
 import {Utils} from '@natlibfi/melinda-commons';
 import {BLOB_STATE, createApiClient} from '@natlibfi/melinda-record-import-commons';
 
 import {
-	API_URL, API_USERNAME, API_PASSWORD, API_CLIENT_USER_AGENT
+	API_URL, API_USERNAME, API_PASSWORD, API_CLIENT_USER_AGENT, API_HARVERSTER_PROFILE_ID
 } from '../config';
 
 const {createLogger} = Utils;
@@ -52,11 +54,13 @@ export async function getBlobs() {
 		const data = await client.getBlobMetadata({id});
 		console.log(data.processingInfo.importResults);
 		const importResults = data.processingInfo.importResults;
-		const justMetadata = importResults.map(record => {
-			if (record.status === "UPDATE REQUIRED") {
+		const justMetadata = importResults
+			.filter(record => {
+				return record.status === 'UPDATE REQUIRED';
+			})
+			.map(record => {
 				return record.metadata;
-			}
-		});
+			});
 		/* UPDATE REQUIRED schema: (Record does not have most recent version)
 		{
         	"timestamp": "2019-11-14T16:09:45.725Z",
@@ -103,17 +107,18 @@ export async function processBlobs({client, query, processCallback, messageCallb
 }
 
 // TODO - Send record to queue
-export async function sendBlob(blob = [], type = 'application/json', profile = '') {
+export async function sendBlob(blob = [], type = 'application/json', profile = API_HARVERSTER_PROFILE_ID) {
 	const logger = createLogger();
 	logger.log('info', 'Melinda-record-link-migration blob sending to ErätuontiService has begun!');
+	if (blob.length > 0 && profile.length > 0) {
+		const client = createApiClient({
+			url: API_URL, username: API_USERNAME, password: API_PASSWORD,
+			userAgent: API_CLIENT_USER_AGENT
+		});
 
-	const client = createApiClient({
-		url: API_URL, username: API_USERNAME, password: API_PASSWORD,
-		userAgent: API_CLIENT_USER_AGENT
-	});
-
-	logger.log('info', `Trying to create  blob`);
-	// Record-import-commons: async function createBlob({blob, type, profile})
-	client.createBLOB({blob, type, profile});
-	// TODO TRANSFORMER picks it from QUEUE
+		logger.log('info', 'Trying to create  blob');
+		// Record-import-commons: async function createBlob({blob, type, profile})
+		client.createBlob({blob, type, profile});
+		// TODO TRANSFORMER picks it from QUEUE
+	}
 }
