@@ -1,19 +1,16 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-vars, import/named, no-undef */
 
-import amqplib from 'amqplib';
 import {Utils} from '@natlibfi/melinda-commons';
-import {logError, changeJobStatus} from '../util';
-import {readXMLResponseToMarcRecords} from './responseToRecordService';
-import {getRecordsList, getRecordById} from './oai-pmhService';
-import {getLinkedInfo} from './sruService';
-import {sendBlob} from './eratuontiService';
-import {AMQP_URL, AMQP_QUEUE_NAME, JOB_DONE} from '../config';
-import {EMITTER} from '../app';
+import {logError} from '@natlibfi/melinda-record-link-migration-commons';
+import {readXMLResponseToMarcRecords} from './responseToRecord';
+import {getRecordById} from './oai-pmh';
+import {getLinkedInfo} from './sru';
+import {sendBlob} from './eratuonti';
 
 const {createLogger} = Utils;
 const logger = createLogger();
 
-export function createBlob({root, format, tags, confType, ids, fromTo}) {
+export function createBlob({root, format, tags, confType}) {
 	logger.log('info', 'BEGUN TO MAKE BLOB!');
 	setEmitterListeners(root, format, tags);
 	if (confType === 1 || confType === 2) {

@@ -31,18 +31,14 @@ export async function getRecordById(opts) {
 	});
 }
 
-export async function getRecordsList(opts) {
+export async function getRecordsList({oaiPmhRoot, oaiPmhFormat}) {
 	// TODO HTTP gets
 	// https://oai-pmh.api.melinda.kansalliskirjasto.fi/bib?verb=ListRecords&metadataPrefix=melinda_marc
-	// Temp to see all opts
-	const {root, format} = opts;
 
-	const getString = `?verb=ListRecords&metadataPrefix=${format}`;
-	const url = `/${root}${getString}`;
+	const getString = `?verb=ListRecords&metadataPrefix=${oaiPmhFormat}`;
+	const url = `/${oaiPmhRoot}${getString}`;
 	const baseURL = `${OAI_PMH_URL}`;
-	// TEST logger.log('debug', baseURL + url);
 
-	// Axios#get(url[, config])
 	return axios({
 		method: 'GET',
 		url,

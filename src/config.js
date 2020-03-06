@@ -23,36 +23,11 @@ export const SRU_HTTP_PORT = readEnvironmentVariable('SRU_HTTP_PORT', {defaultVa
 export const SRU_VERSION = readEnvironmentVariable('SRU_VERSION', {defaultValue: '2'});
 
 // Config file variables
-export const CONF_FILE = './job-configs/' + readEnvironmentVariable('CONF_FILE', {defaultValue: 'run2.json'});
-export const CURRENT_JOB_FILEPATH = './job/done.json';
-export const DEFAULT_OAI_PMH_ROOT = readEnvironmentVariable('DEFAULT_OAI_PMH_ROOT', {defaultValue: 'bib'});
-export const DEFAULT_TAGS = readEnvironmentVariable('DEFAULT_TAGS', {defaultValue: ['100', '110', '350']});
-export const DEFAULT_FORMAT = readEnvironmentVariable('DEFAULT_FORMAT', {defaultValue: 'melinda_marc'});
-// Chunk size 100 => last request time ~8.5sec. Chunk size 10 => last request time ~1sec (sequental id numbers)
-// Chunk size 100 => last request time ?. Chunk size 10 => last request time ~1.1sec (unsequental id numbers)
-export const CHUNK_SIZE = readEnvironmentVariable('CHUNK_SIZE', {defaultValue: 10, format: v => Number(v)});
+export const JOB_CONFIG = readEnvironmentVariable('JOB_CONFIG', {defaultValue: 'default'});
+
+// Mongo variables to job
+export const MONGO_URI = readEnvironmentVariable('MONGO_URI', {defaultValue: 'mongodb://127.0.0.1:27017/db'});
 
 // AMQP variables
-export const AMQP_URL = readEnvironmentVariable('AMQP_URL', {
-	defaultValue: {
-		protocol: 'amqp',
-		hostname: 'localhost',
-		port: 5672,
-		username: 'melinda',
-		password: 'test12',
-		frameMax: 0,
-		heartbeat: 0,
-		vhost: '/'
-	}
-});
-export const AMQP_QUEUE_NAME = 'melinda-queue';
-export const AMQP_QUEUE_PURGE_ON_LOAD = readEnvironmentVariable('PURGE_QUEUE_ON_LOAD', {defaultValue: true, format: parseBoolean});
-
-// Emiter variables
-export const EMITTER_JOB_CONSUME = 'EMITTER_JOB_CONSUME';
-
-// JOB status
-export const JOB_NONE = 'NONE';
-export const JOB_DONE = 'DONE';
-export const JOB_IN_QUEUE = 'IN_QUEUE';
-export const JOB_FAILED = 'FAILED';
+export const AMQP_URL = readEnvironmentVariable('AMQP_URL', {defaultValue: 'amqp://127.0.0.1:5672/'});
+export const AMQP_QUEUE_PURGE_ON_LOAD = readEnvironmentVariable('PURGE_QUEUE_ON_LOAD', {defaultValue: 1, format: v => parseBoolean(v)});

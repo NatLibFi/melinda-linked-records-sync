@@ -32,7 +32,7 @@ export async function getBlobs() {
 			// TODO - Parse blobs
 			const {id, processedRecords, failedRecords, numberOfRecords} = blob;
 			logger.log('info', `Blob: ${id}, ${processedRecords}, ${failedRecords}, ${numberOfRecords}`);
-			// TODO - Do staff to blob
+			// TODO - Do stuff to blob
 			console.log(blob);
 			getFailedRecordsFromBlob(id);
 			return processCallback(blobs);
@@ -56,15 +56,15 @@ export async function getBlobs() {
 		const importResults = data.processingInfo.importResults;
 		const justMetadata = importResults
 			.filter(record => {
-				return record.status === 'UPDATE REQUIRED';
+				return record.status === 'ACTION_NEEDED';
 			})
 			.map(record => {
 				return record.metadata;
 			});
-		/* UPDATE REQUIRED schema: (Record does not have most recent version)
+		/* UPDATE REQUIRED schema: (Record does not have most recent version) TODO: Add reason to metadata.
 		{
         	"timestamp": "2019-11-14T16:09:45.725Z",
-        	"status": "UPDATE REQUIRED",
+        	"status": "ACTION_NEEDED",
         	"metadata": {
           		"id": "012345678",
           		"linkData": [
