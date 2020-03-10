@@ -106,11 +106,15 @@ export async function processBlobs({client, query, processCallback, messageCallb
 	});
 }
 
-// TODO - Send record to queue
-export async function sendBlob(blob = [], type = 'application/json', profile = API_HARVERSTER_PROFILE_ID) {
+// Send record to transformer
+export async function sendBlob(data) {
+	const blob = JSON.stringify(data);
+	const type = 'application/json';
+	const profile = API_HARVERSTER_PROFILE_ID;
+	// Console.log(data);
 	const logger = createLogger();
-	logger.log('info', 'Melinda-record-link-migration blob sending to ErätuontiService has begun!');
-	if (blob.length > 0 && profile.length > 0) {
+	logger.log('info', 'Melinda-record-link-migration data sending to ErätuontiService has begun!');
+	if (blob) {
 		const client = createApiClient({
 			url: API_URL, username: API_USERNAME, password: API_PASSWORD,
 			userAgent: API_CLIENT_USER_AGENT
@@ -118,7 +122,8 @@ export async function sendBlob(blob = [], type = 'application/json', profile = A
 
 		logger.log('info', 'Trying to create  blob');
 		// Record-import-commons: async function createBlob({blob, type, profile})
-		client.createBlob({blob, type, profile});
+		const response = await client.createBlob({blob, type, profile});
+		console.log('response', response);
 		// TODO TRANSFORMER picks it from QUEUE
 	}
 }

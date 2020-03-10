@@ -68,7 +68,8 @@
 		"rules": {
 			"prefer-arrow-callback": [
 				"error"
-			]
+			],
+			"no-warning-comments": 0
 		}
 	},
 	"babel": {

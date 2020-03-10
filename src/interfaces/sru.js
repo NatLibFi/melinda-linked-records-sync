@@ -5,41 +5,47 @@ import {SRU_URL, SRU_VERSION} from '../config';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 
 // NEEDS MORE? const sruClient = createSruClient({serverUrl: sruURL, version: SRU_VERSION, maximumRecords: 1});
-const client = createSruClient({serverUrl: 'https://sru.api.melinda-test.kansalliskirjasto.fi/bib', version: '2.0', maximumRecords: '1'});
+const client = createSruClient({serverUrl: 'https://sru.api.melinda-test.kansalliskirjasto.fi/autprv-names', version: '2.0', maximumRecords: '1'});
 const {createLogger} = Utils;
 const logger = createLogger();
 
 export async function getLinkedInfo(marcRecord, tags) {
 	let linkdata = [];
-	// Generate querries
-	const querries = await generateQuerries(marcRecord, tags);
+	// Generate queries
+	const queries = await generateQueries(marcRecord, tags);
 	// Check incoming record logger.log('debug', JSON.stringify(marcRecord));
-	// Execute querries
-	if (querries.length > 0) {
-		await new Promise((resolve, reject) => {
+	// Execute queries
+	queries.forEach(data => {
+		linkdata.push(doQuery(data));
+	});
+
+	// Return json
+	return Promise.all(linkdata);
+
+	async function doQuery(data) {
+		return new Promise((resolve, reject) => {
 			// TODO: Search every tag
-			client.searchRetrieve(querries[0].query)
+			client.searchRetrieve(data.query)
+
 				.on('record', xmlString => {
 					// TODO processRecord(xmlString);
-					linkdata.push({tag: querries.tag, record: MARCXML.from(xmlString)});
+					resolve({tag: data.tag, record: MARCXML.from(xmlString)});
 					// Check incoming data: logger.log('debug', JSON.stringify(record));
 				})
-				.on('end', () => resolve())
+				.on('end', () => resolve({tag: data.tag, record: false}))
 				.on('error', err => reject(err));
 		});
 	}
-
-	// Return json
-	return linkdata;
 }
 
-async function generateQuerries(marcRecord, tags) {
+// TODO CONFIG FILE -> run by tag!
+async function generateQueries(marcRecord, tags) {
 	// KATSO https://github.com/NatLibFi/marc-record-js
 	// TODO Kentät BIB
 	// Haku titlellä client.searchRetrieve('dc.title="kivi*"')
 	// Haku idllä client.searchRetrieve('rec.id=9000')
 	// Haku tekijällä client.searchRetrieve('dc.author="Päätalo, Kalle"')
-	// Lisä infoa http://app.aleph.csc.fi:210/bib
+	// Lisä infoa https://rest.api.melinda-test.kansalliskirjasto.fi/bib
 	// 026 Sormenjälki
 	// 017 Tekijänoikeus
 	// 034 kartta tiedot
@@ -65,7 +71,7 @@ async function generateQuerries(marcRecord, tags) {
 	// 373 - YHTEYS RYHMÄÄN (T)
 	// 375 - SUKUPUOLI (T)
 	// 378 - HENKILÖNNIMEN TÄYDELLISEMPI MUOTO (T)
-	const querries = [];
+	const queries = [];
 	let fields;
 	tags.forEach(tag => {
 		switch (tag) {
@@ -82,7 +88,7 @@ async function generateQuerries(marcRecord, tags) {
 						const subF = subfields.find(sub => sub.code === 'f'); // ‡f - Teoksen julkaisuaika (ET)
 						const subQ = subfields.find(sub => sub.code === 'q'); // ‡q - Henkilönnimen täydellisempi muoto (ET)
 
-						querries.push({tag, query: `dc.author="${subA.value}"`});
+						queries.push({tag, query: `"${subA.value}"`});
 					}
 				}
 
@@ -92,14 +98,14 @@ async function generateQuerries(marcRecord, tags) {
 				fields = marcRecord.get(/^110$/);
 				if (fields.length > 0) {
 					const subfields = fields[0].subfields;
-					console.log(subfields);
+					// Check console.log(subfields);
 					// No point to repeat allready linked data
 					if (!subfields.some(sub => sub.code === '0')) {
 						const subA = subfields.find(sub => sub.code === 'a'); // ‡a - Yhteisönnimi (ET)
 						const subE = subfields.find(sub => sub.code === 'e'); // ‡e - Suhdetermi (T)
 						const subF = subfields.find(sub => sub.code === 'f'); // ‡f - Teoksen julkaisuaika (ET)
 
-						// Querry communities querries.push(`dc.author="${subA.value}"`);
+						// Querry communities queries.push(`dc.author="${subA.value}"`);
 					}
 				}
 
@@ -111,5 +117,5 @@ async function generateQuerries(marcRecord, tags) {
 				break;
 		}
 	});
-	return querries;
+	return queries;
 }

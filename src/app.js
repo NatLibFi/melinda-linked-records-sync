@@ -6,6 +6,7 @@ import {createIdsFromTo, listToChunkList} from './util';
 import {getJobConfig} from './interfaces/jobConfig';
 import {v4 as uuid} from 'uuid';
 import {getRecordsList} from './interfaces/oai-pmh';
+import {collect} from './interfaces/collect';
 import {readXMLResponseToMarcRecords} from './interfaces/responseToRecord';
 import {promisify} from 'util';
 
@@ -37,17 +38,24 @@ export default async function ({
 	async function checkJobs() {
 		// Await till last part of migration process is done
 		const jobInQ = await mongoOperator.getOne(JOB_STATES.IN_QUEUE); // Transformer
-		const jobInP = await mongoOperator.getOne(JOB_STATES.IN_PROCESS); // Importer
-		if (jobInP !== null || jobInQ !== null) {
-			console.log(jobInQ);
-			console.log(jobInP);
-			// DEV HELP
-			if (jobInQ) {
-				removeJob(jobInQ.jobId);
+		if (jobInQ) {
+			const allHandled = await collect(jobInQ, amqpOperator);
+
+			if (allHandled) {
+				await mongoOperator.setState({jobId: jobInQ.jobId, state: JOB_STATES.IN_PROCESS});
 			}
 
+			await setTimeoutPromise(1000); // Slow sru querys
+			return checkJobs();
+		}
+
+		const jobInP = await mongoOperator.getOne(JOB_STATES.IN_PROCESS); // Importer
+		if (jobInP !== null) {
+			console.log(jobInP);
+
 			if (jobInP) {
-				removeJob(jobInP.jobId);
+				// RemoveJob(jobInP.jobId);
+				process.exit(0);
 			}
 
 			await setTimeoutPromise(3000);
@@ -56,6 +64,8 @@ export default async function ({
 
 		const jobDone = await mongoOperator.getOne(JOB_STATES.DONE);
 		if (jobDone) {
+			// DEV HELP
+			removeJob(jobDone.jobId);
 			// TODO check if specific time is past before making redo job
 			// redo job
 			await setTimeoutPromise(3000);
@@ -91,7 +101,7 @@ export default async function ({
 	}
 
 	// TODO prosessing loop
-	async function runJob(jobId, {oaiPmhRoot, oaiPmhFormat, tags, ids, fromTo, startFrom, resumptionToken}) {
+	async function runJob(jobId, {oaiPmhRoot, oaiPmhFormat, tags, ids, fromTo, startFrom, resumptionToken = false}) {
 		let chunks = [];
 		// DEBUG
 		// console.log(oaiPmhRoot);
@@ -102,7 +112,7 @@ export default async function ({
 		// console.log(startFrom);
 		// console.log(resumptionToken);
 
-		// TODO Check queue
+		// TODO if QUEUE empty check
 		const messagesAmount = await amqpOperator.checkQueue(jobId, 'messages', false);
 
 		if (messagesAmount) {
@@ -110,8 +120,11 @@ export default async function ({
 			return checkJobs();
 		}
 
-		// TODO if QUEUE empty check if resumptionToken
 		// TODO Continue with resumption token
+		if (resumptionToken) {
+			const jsonResumptionToken = JSON.parse(resumptionToken);
+			console.log(jsonResumptionToken);
+		}
 
 		// Queue from the start:
 		if (ids) {
@@ -145,23 +158,24 @@ export default async function ({
 		}
 
 		// TODO (startFrom)
-
-		if (!ids && !fromTo && !startFrom) {
-			// GET JUST FROM ROOT (job.root)
-			logger.log('info', `JOB from root: ${oaiPmhRoot}`);
-			// Check if Queue exists ? get token : start one
-			// Fetch 1000 from oai-pmh
-			const xmlResponse = await getRecordsList({oaiPmhRoot, oaiPmhFormat});
-			// Transform xmlResponse to marcRecords
-			const resumptionToken = await readXMLResponseToMarcRecords({amqpOperator, jobId, tags, response: xmlResponse});
-			// TODO save resumptionToken to mongo
-			// console.log(resumptionToken);
-			console.log(await mongoOperator.updateResumptionToken({jobId, resumptionToken}));
-			// Console.log(records[0]);
-
-			mongoOperator.setState({jobId, state: JOB_STATES.IN_QUEUE});
-
+		if (startFrom) {
 			return checkJobs();
 		}
+
+		// GET JUST FROM ROOT (job.root)
+		logger.log('info', `JOB from root: ${oaiPmhRoot}`);
+		// Check if Queue exists ? get token : start one
+		// Fetch 1000 from oai-pmh
+		const xmlResponse = await getRecordsList({oaiPmhRoot, oaiPmhFormat});
+		// Transform xmlResponse to marcRecords
+		const newResumptionToken = await readXMLResponseToMarcRecords({amqpOperator, jobId, tags, response: xmlResponse});
+		// TODO save resumptionToken to mongo
+		// console.log(resumptionToken);
+		console.log(await mongoOperator.updateResumptionToken({jobId, newResumptionToken}));
+		// Console.log(records[0]);
+
+		mongoOperator.setState({jobId, state: JOB_STATES.IN_QUEUE});
+
+		return checkJobs();
 	}
 }
