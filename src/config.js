@@ -1,0 +1,27 @@
+import {Utils} from '@natlibfi/melinda-commons/';
+
+const {readEnvironmentVariable, parseBoolean} = Utils;
+
+// Api client variables
+export const apiUrl = readEnvironmentVariable('API_URL');
+export const apiUsername = readEnvironmentVariable('API_USERNAME');
+export const apiPassword = readEnvironmentVariable('API_PASSWORD');
+export const apiClientUserAgent = readEnvironmentVariable('API_CLIENT_USER_AGENT', {defaultValue: '_RECORD-LINK-MIGRATION'});
+
+// OAI-PMH connection variables
+// Change URL to test
+export const OAI_PMH_URL = readEnvironmentVariable('OAI_PMH_URL');
+export const OAI_PMH_HTTP_PORT = readEnvironmentVariable('OAI_PMH_HTTP_PORT', {defaultValue: 8080, format: v => Number(v)});
+export const OAI_PMH_USERNAME = readEnvironmentVariable('OAI_PMH_USERNAME');
+export const OAI_PMH_PASSWORD = readEnvironmentVariable('OAI_PMH_PASSWORD');
+export const OAI_PMH_CONCURRENT_REQUESTS = readEnvironmentVariable('OAI_PMH_CONCURRENT_REQUESTS', {defaultValue: 1, format: v => Number(v)});
+
+// Config file variables
+export const JOB_CONFIG = readEnvironmentVariable('JOB_CONFIG', {defaultValue: 'test3'});
+
+// Mongo variables to job
+export const mongoUrl = readEnvironmentVariable('MONGO_URI', {defaultValue: 'mongodb://127.0.0.1:27017/db'});
+
+// AMQP variables
+export const AMQP_URL = readEnvironmentVariable('AMQP_URL', {defaultValue: 'amqp://127.0.0.1:5672/'});
+export const AMQP_QUEUE_PURGE_ON_LOAD = readEnvironmentVariable('PURGE_QUEUE_ON_LOAD', {defaultValue: 1, format: v => parseBoolean(v)});
