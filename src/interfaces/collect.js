@@ -1,17 +1,21 @@
 import {getLinkedInfo} from './sru';
 import {Json} from '@natlibfi/marc-record-serializers';
 import {sendBlob} from './eratuonti';
+import {Utils} from '@natlibfi/melinda-commons';
 
 export async function collect({jobId}, amqpOperator) {
+	const {createLogger} = Utils;
+	const logger = createLogger(); // eslint-disable-line no-unused-vars
+
 	// Read from queue
 	const message = await amqpOperator.checkQueue(jobId, 'raw');
 
 	if (message) {
-		const tags = message.properties.headers.tags;
+		const links = message.properties.headers.links;
 		const record = Json.from(message.content.toString());
 
 		// Get link data
-		const linkData = await getLinkedInfo(record, tags);
+		const linkData = await getLinkedInfo(record, links);
 
 		// TODO Check linkData
 		if (linkData.length < 1) {
@@ -21,15 +25,16 @@ export async function collect({jobId}, amqpOperator) {
 		}
 
 		const filteredLinkData = linkData.filter(data => data.record);
+		// Check logger.log('debug', JSON.stringify(filteredLinkData, null, '\t'));
 
 		if (filteredLinkData.length > 0) {
-			console.log('SEND BLOB TO ERÄTUONTI');
+			logger.log('info', 'Sending blob to erätuonti');
 			// Push to erätuonti
-			await sendBlob([{record, linkData: filteredLinkData}]);
+			const blobId = await sendBlob([{record, linkData: filteredLinkData}]);
 
 			// Ack message data is passed to transformer
 			await amqpOperator.ackMessages([message]);
-			return;
+			return blobId;
 		}
 
 		// Ack message nothing to update

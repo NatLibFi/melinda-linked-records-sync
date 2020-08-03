@@ -32,7 +32,7 @@ export function getJobConfig() {
 		const opts = {
 			oaiPmhRoot: config.oai_pmh_root || DEFAULT_JOB_CONFIG.oaiPmhRoot,
 			oaiPmhFormat: config.oai_pmh_format || DEFAULT_JOB_CONFIG.oaiPmhFormat,
-			tags: config.tags || DEFAULT_JOB_CONFIG.tags,
+			links: config.links || DEFAULT_JOB_CONFIG.links,
 			ids: config.ids || DEFAULT_JOB_CONFIG.ids,
 			fromTo: config.fromTo || DEFAULT_JOB_CONFIG.fromTo,
 			startFrom: config.startFrom || DEFAULT_JOB_CONFIG.startFrom

@@ -23,7 +23,7 @@ export const SRU_HTTP_PORT = readEnvironmentVariable('SRU_HTTP_PORT', {defaultVa
 export const SRU_VERSION = readEnvironmentVariable('SRU_VERSION', {defaultValue: '2'});
 
 // Config file variables
-export const JOB_CONFIG = readEnvironmentVariable('JOB_CONFIG', {defaultValue: 'default'});
+export const JOB_CONFIG = readEnvironmentVariable('JOB_CONFIG', {defaultValue: 'test3'});
 
 // Mongo variables to job
 export const MONGO_URI = readEnvironmentVariable('MONGO_URI', {defaultValue: 'mongodb://127.0.0.1:27017/db'});

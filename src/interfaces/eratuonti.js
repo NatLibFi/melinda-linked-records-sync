@@ -123,7 +123,9 @@ export async function sendBlob(data) {
 		logger.log('info', 'Trying to create  blob');
 		// Record-import-commons: async function createBlob({blob, type, profile})
 		const response = await client.createBlob({blob, type, profile});
-		console.log('response', response);
+
+		// Return blobId to be saved in jobItem
+		return response;
 		// TODO TRANSFORMER picks it from QUEUE
 	}
 }

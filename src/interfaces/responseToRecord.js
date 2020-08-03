@@ -7,7 +7,7 @@ import {MARCXML} from '@natlibfi/marc-record-serializers';
 const {createLogger} = Utils;
 const logger = createLogger();
 
-export async function readXMLResponseToMarcRecords({amqpOperator, jobId, tags, response}) {
+export async function readXMLResponseToMarcRecords({amqpOperator, jobId, links, response}) {
 	const obj = await parse();
 	let resumptionToken = '';
 	const promises = [];
@@ -22,7 +22,7 @@ export async function readXMLResponseToMarcRecords({amqpOperator, jobId, tags, r
 						await build(record.metadata[0].record[0])
 					);
 
-					await amqpOperator.sendToQueue({queue: jobId, correlationId: jobId, headers: {tags}, data: marcRecord.toObject()});
+					await amqpOperator.sendToQueue({queue: jobId, correlationId: jobId, headers: {links}, data: marcRecord.toObject()});
 				}
 			});
 

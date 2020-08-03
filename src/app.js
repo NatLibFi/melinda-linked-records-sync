@@ -101,12 +101,12 @@ export default async function ({
 	}
 
 	// TODO prosessing loop
-	async function runJob(jobId, {oaiPmhRoot, oaiPmhFormat, tags, ids, fromTo, startFrom, resumptionToken = false}) {
+	async function runJob(jobId, {oaiPmhRoot, oaiPmhFormat, links, ids, fromTo, startFrom, resumptionToken = false}) {
 		let chunks = [];
 		// DEBUG
 		// console.log(oaiPmhRoot);
 		// console.log(oaiPmhFormat);
-		// console.log(tags);
+		// console.log(links);
 		// console.log(ids);
 		// console.log(fromTo);
 		// console.log(startFrom);
@@ -168,7 +168,7 @@ export default async function ({
 		// Fetch 1000 from oai-pmh
 		const xmlResponse = await getRecordsList({oaiPmhRoot, oaiPmhFormat});
 		// Transform xmlResponse to marcRecords
-		const newResumptionToken = await readXMLResponseToMarcRecords({amqpOperator, jobId, tags, response: xmlResponse});
+		const newResumptionToken = await readXMLResponseToMarcRecords({amqpOperator, jobId, links, response: xmlResponse});
 		// TODO save resumptionToken to mongo
 		// console.log(resumptionToken);
 		console.log(await mongoOperator.updateResumptionToken({jobId, newResumptionToken}));
